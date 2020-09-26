@@ -8,13 +8,46 @@ from collections import defaultdict
 from typing import Dict, Tuple, List
 import pandas as pd
 from sklearn.metrics import average_precision_score
+import arrow
+import uuid
+from tqdm import tqdm
 
 import numpy as np
 import torch
 from .models import TKBCModel
 
+tqdm.pandas()
 
 DATA_PATH = pkg_resources.resource_filename('tkbc', 'data/')
+
+def get_timestamp(value):
+  if(pd.isna(value)):
+    return 0
+  if(value == '~'):
+    return 0
+  value_correct = value[1:] \
+                        .replace('-00','-01') \
+                        .replace('-11-31','-11-30') 
+  try:
+    return arrow.get(value_correct).timestamp
+  except:
+    return None
+
+def time_string_to_timestamp(df,time_column):
+  temp_col = str(uuid.uuid1())
+  df_time = df[[time_column]].drop_duplicates()
+  df_time[temp_col] = df_time.progress_apply(lambda row: get_timestamp(row[time_column]),axis=1)
+  df_time_join = df.join(df_time.set_index(time_column),on=time_column,how='inner')\
+                 .drop(columns=[time_column]) \
+                 .rename(columns={temp_col:time_column})
+  return df_time_join
+
+
+def get_dataframe(root_path,f):
+    df = pd.read_csv(str(root_path / f) ,sep='\t',header=None).dropna()
+    df = time_string_to_timestamp(df,3)
+    df = time_string_to_timestamp(df,4)
+    return df
 
 class TemporalDataset(object):
     def __init__(self, name: str):
@@ -22,7 +55,7 @@ class TemporalDataset(object):
 
         self.data = {}
         for f in ['train', 'test', 'valid']:
-            self.data[f] = pd.read_csv(str(self.root / f) ,sep='\t',header=None).fillna('')
+            self.data[f] = get_dataframe(self.root,f)
 
         maxis = np.max(self.data['train'], axis=0)
         self.n_entities = int(max(maxis[0], maxis[2]) + 1)
