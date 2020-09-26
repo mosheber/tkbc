@@ -37,7 +37,14 @@ def time_string_to_timestamp(df,time_column):
   temp_col = str(uuid.uuid1())
   df_time = df[[time_column]].drop_duplicates()
   df_time[temp_col] = df_time.progress_apply(lambda row: get_timestamp(row[time_column]),axis=1)
-  df_time_join = df.join(df_time.set_index(time_column),on=time_column,how='inner')\
+  
+  order_index = df_time[[temp_col]].drop_duplicates().sort_values(by=temp_col) \
+                                   .reset_index().reset_index().drop(columns=['index'])
+
+  df_time = df_time.join(order_index.set_index(temp_col),on=temp_col,how='inner') \
+                             .drop(columns=[temp_col]).rename(columns={'level_0':temp_col})
+
+  df_time_join = df.join(df_time.set_index(time_column),on=time_column,how='inner') \
                  .drop(columns=[time_column]) \
                  .rename(columns={temp_col:time_column})
   return df_time_join
@@ -88,10 +95,10 @@ class TemporalDataset(object):
             print("Not using time intervals and events eval")
             self.events = None
 
-        if self.events is None:
-            inp_f = open(str(self.root / f'to_skip.pickle'), 'rb')
-            self.to_skip: Dict[str, Dict[Tuple[int, int, int], List[int]]] = pickle.load(inp_f)
-            inp_f.close()
+        # if self.events is None:
+        #     inp_f = open(str(self.root / f'to_skip.pickle'), 'rb')
+        #     self.to_skip: Dict[str, Dict[Tuple[int, int, int], List[int]]] = pickle.load(inp_f)
+        #     inp_f.close()
 
 
         # If dataset has events, it's wikidata.
