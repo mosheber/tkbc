@@ -22,7 +22,7 @@ class TemporalDataset(object):
 
         self.data = {}
         for f in ['train', 'test', 'valid']:
-            self.data[f] = pd.read_csv(str(self.root / f) ,sep='\t',header=None)
+            self.data[f] = pd.read_csv(str(self.root / f) ,sep='\t',header=None).fillna('')
 
         maxis = np.max(self.data['train'], axis=0)
         self.n_entities = int(max(maxis[0], maxis[2]) + 1)
