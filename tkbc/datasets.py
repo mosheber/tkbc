@@ -11,7 +11,7 @@ from sklearn.metrics import average_precision_score
 
 import numpy as np
 import torch
-from models import TKBCModel
+from .models import TKBCModel
 
 
 DATA_PATH = pkg_resources.resource_filename('tkbc', 'data/')

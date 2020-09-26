@@ -5,9 +5,9 @@ import torch
 from torch import nn
 from torch import optim
 
-from models import TKBCModel
-from regularizers import Regularizer
-from datasets import TemporalDataset
+from .models import TKBCModel
+from .regularizers import Regularizer
+from .datasets import TemporalDataset
 
 
 class TKBCOptimizer(object):

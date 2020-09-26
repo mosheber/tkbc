@@ -6,10 +6,10 @@ import logging
 import torch
 from torch import optim
 
-from datasets import TemporalDataset
-from optimizers import TKBCOptimizer, IKBCOptimizer
-from models import ComplEx, TComplEx, TNTComplEx
-from regularizers import N3, Lambda3
+from .datasets import TemporalDataset
+from .optimizers import TKBCOptimizer, IKBCOptimizer
+from .models import ComplEx, TComplEx, TNTComplEx
+from .regularizers import N3, Lambda3
 
 parser = argparse.ArgumentParser(
     description="Temporal ComplEx"
