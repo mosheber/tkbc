@@ -6,7 +6,7 @@ import pkg_resources
 import pickle
 from collections import defaultdict
 from typing import Dict, Tuple, List
-
+import pandas as pd
 from sklearn.metrics import average_precision_score
 
 import numpy as np
@@ -22,8 +22,7 @@ class TemporalDataset(object):
 
         self.data = {}
         for f in ['train', 'test', 'valid']:
-            in_file = open(str(self.root / (f + '.pickle')), 'rb')
-            self.data[f] = pickle.load(in_file)
+            self.data[f] = pd.read_csv(str(self.root / (f) ,sep='\t',header=None))
 
         maxis = np.max(self.data['train'], axis=0)
         self.n_entities = int(max(maxis[0], maxis[2]) + 1)
